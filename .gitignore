@@ -1,7 +1,8 @@
 .DS_Store
 dist/electron/
 dist/web/
-build/win-unpacked
+build/!icons
+build/!*.nsis.7z
 coverage
 node_modules/
 npm-debug.log

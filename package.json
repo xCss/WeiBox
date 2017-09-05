@@ -30,12 +30,14 @@
   },
   "build": {
     "productName": "WeiBox",
-    "appId": "org.simulatedgreg.electron-vue",
+    "appId": null,
     "directories": {
       "output": "build"
     },
     "files": [
-      "dist/electron/**/*"
+      "dist/electron",
+      "node_modules/",
+      "package.json"
     ],
     "dmg": {
       "contents": [
@@ -53,7 +55,9 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/icon.icns",
+      "target": ["mas", "dmg", "pkg"],
+      "bundleVersion": "1.0.0"
     },
     "win": {
       "icon": "build/icons/icon.ico"
