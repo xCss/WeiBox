@@ -1,6 +1,7 @@
 .DS_Store
 dist/electron/
 dist/web/
+dist/win*/
 build/!icons
 coverage
 node_modules/
