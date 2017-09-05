@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray } from 'electron'
+import { app, ipcMain,BrowserWindow, Menu, Tray } from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -99,10 +99,18 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 563,
     useContentSize: true,
-    width: 1000
+    width: 1000,
+    titleBarStyle: 'hidden-inset',
+    resizable: false,
+    show: false,
   })
 
   mainWindow.loadURL(winURL)
+
+  // disable white loading page by 'ready-to-show' event
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  })
 
   mainWindow.on('closed', () => {
     mainWindow = null
@@ -132,6 +140,10 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow()
   }
+})
+
+ipcMain.on('ex1',(event,args)=>{
+  console.log(args);
 })
 
 /**
