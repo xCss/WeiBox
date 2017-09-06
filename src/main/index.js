@@ -142,8 +142,9 @@ app.on('activate', () => {
   }
 })
 
-ipcMain.on('ex1',(event,args)=>{
+ipcMain.on('asynchronous-message',(event,args)=>{
   console.log(args);
+  event.sender.send('asynchronous-reply', 'pong')
 })
 
 /**

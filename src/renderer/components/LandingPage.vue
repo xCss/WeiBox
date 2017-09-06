@@ -1,5 +1,5 @@
 <template>
-  <div id="wrapper" >
+  <div id="wrapper" @click="send">
     <img id="logo" src="~@/assets/logo.png" alt="electron-vue">
     <main>
       <div class="left-side">
@@ -35,9 +35,19 @@
   export default {
     name: 'landing-page',
     components: { SystemInformation },
+    mounted(){
+    },
     methods: {
       open (link) {
         this.$electron.shell.openExternal(link)
+      },
+      send(){
+      let ipcRenderer = this.$electron.ipcRenderer
+      ipcRenderer.on('asynchronous-reply', (event, arg) => {
+        //console.log(event) // prints "pong"
+        window.location.reload()
+      })
+      ipcRenderer.send('asynchronous-message', 'ping')
       }
     }
   }
