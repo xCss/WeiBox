@@ -11,5 +11,11 @@
 </script>
 
 <style>
-  /* CSS */
+/* CSS */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body { color:#58666e;font-family: "Exo 2", "Trebuchet MS","Helvetica","Arial",'PingFang SC','Hiragino Sans GB','STHeiti Light','Microsoft YaHei','SimHei','WenQuanYi Micro Hei',sans-serif ;}
 </style>

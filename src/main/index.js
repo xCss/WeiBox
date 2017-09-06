@@ -102,7 +102,7 @@ function createWindow () {
     width: 1000,
     titleBarStyle: 'hidden-inset',
     resizable: false,
-    show: false,
+    show: false
   })
 
   mainWindow.loadURL(winURL)
