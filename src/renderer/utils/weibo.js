@@ -1,53 +1,180 @@
 import fs from 'fs'
+import querystring from 'querystring'
+import request from 'request'
+const encodePostData = require('./encodePostData.js')
+const store = localStorage
 
-class Weibo{
-    constructor(opts){
+export default class Weibo{
+    constructor(userName='',userPwd=''){
         let self = this
-        self.pincode_path = 'pincode.png'
-        self.cookies_files = 'weibo_login_cookies.dat'
-        self.headers={
-            'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0',
-            'Referer': 'http://weibo.com/'
-        }
-        self.ssoPreLoginUrl = 'http://login.sina.com.cn/sso/prelogin.php'
-        self.ssoPreLoginPayload = {
-            'su': '',
-            'entry': 'weibo',
-            'checkpin': '1',
-            'callback': 'sinaSSOController.preloginCallBack',
-            'rsakt': 'mod',
-            'client': 'ssologin.js(v1.4.18)'
-        }
-        self.pincodeUrl = 'http://login.sina.com.cn/cgi/pin.php'
-        
-        self.ssoLoginUrl = `http://login.sina.com.cn/sso/login.php?
-                            client=ssologin.js(v1.4.18)`
-        
-        self.ssoLoginData = {
-            'sp': '',
-            'su': '',
-            'from': '',
-            'nonce': '',
-            'rsakv': '',
-            'pagerefer': '',
-            'servertime': '',
-            'entry': 'weibo',
-            'gateway': '1',
-            'savestate': '7',
-            'userticket': '1',
-            'vsnf': '1',
-            'service': 'miniblog',
-            'pwencode': 'rsa2',
-            'encoding': 'UTF-8',
-            'prelt': '45',
-            'url': `http://weibo.com/ajaxlogin.php?
-                    framelogin=1&
-                    callback=parent.sinaSSOController.feedBackUrlCallBack`,
-            'returntype': 'META'
+        // 初始化一些登录信息
+        // 用户名
+        self.userName = userName;
+        // 密码
+        self.userPwd = userPwd;
+        // 预登陆地址，不带base64编码后的用户名,用于获取登录信息
+        self.preLoginUrl = "http://login.sina.com.cn/sso/prelogin.php?entry=weibo&checkpin=1&callback=sinaSSOController.preloginCallBack&rsakt=mod&client=ssologin.js(v1.4.18)";
+        // 登录的网页地址
+        self.loginUrl = "http://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.18)";
+        // 初始化预登陆数据为空
+        self.preLoginData = '';
+        // 初始化验证码为空
+        self.pinCode = null;
+
+        self.userName && self.userPwd && self.init()
+    }
+
+    init(){
+        let self = this
+        self.encodePreLoginUrl()
+        try {
+            // 获取预登陆原始数据
+            self.getPreLoginData().then((preLoginInitData)=>{
+                // 解析预登陆原始数据
+                self.preLoginData = self.parsePreLoginData(preLoginInitData)
+                // 是否需要验证码
+                if(self.preLoginData['showpin'] == 1){
+                    console.log('need pin code')
+                    // self.getPinImg();
+                    // self.inputPinCode();
+                }else{
+                    self.postData().then((responseBody)=>{
+                        let finnalRet = self.getFinnalLoginUrl(responseBody)
+                        self.getCookies(finnalRet.res).then(ret=>{
+                            store.setItem('weiboxCookies',ret)
+                        }).catch(ex=>{
+                            console.log(ex)
+                        })
+                    })
+                }
+            })
+        } catch (error) {
+            console.log(error)
         }
     }
 
-    login(opts){
+    // preLoginUrl构造，加上base64编码的用户名
+    encodePreLoginUrl() {
+        let self = this
+        let encodeUserName = encodePostData.encryptUserName(self.userName);
+        self.preLoginUrl = `${self.preLoginUrl}&su=${encodeUserName}`;
+    }
 
+    // 获取预登录数据
+    getPreLoginData() {    
+        return new Promise((resolve, reject) => {
+            request(this.preLoginUrl, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    resolve(response.body);
+                } else {
+                    reject('没有获取到预登录数据');
+                }
+            });
+        });
+    }
+    // 解析获取到的预登录数据
+    parsePreLoginData(data) {
+        let reg = /\((.*)\)/;
+        return JSON.parse(reg.exec(data)[1]);
+    }
+
+    // 如果有验证码则要输入验证码
+    getPinImg() {
+        // 构造验证码的url
+        let pinImgUrl = `http://login.sina.com.cn/cgi/pin.php?r=${Math.floor(Math.random() * 1e8)}&s=0&p=${this.preLoginData['pcid']}`;
+        request(pinImgUrl).pipe(fs.createWriteStream(__dirname + '/../pinCode.png'));
+    }
+
+    inputPinCode() {
+        // const rl = readline.createInterface({
+        //     input: process.stdin,
+        //     output: process.stdout
+        // });
+        // return new Promise((resolve, reject) => {
+        //     rl.question('请输入验证码，验证码图片在根目录下\n', (pinCode) => {
+        //         console.log(`你输入的验证码为：${pinCode}`);
+        //         rl.close();
+        //         resolve(pinCode);
+        //     })
+        // })
+    }
+
+    // post数据到服务器
+    postData(pinCode) {
+        let self = this
+        let headers = {
+            "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:48.0) Gecko/20100101 Firefox/48.0",
+            'Accept-Language': 'zh-cn',
+            'Content-Type':'application/x-www-form-urlencoded',
+            'Connection': 'Keep-Alive'
+        };
+        let encodeBody = encodePostData.encodePostData(self.userName, self.userPwd, self.preLoginData.servertime,
+            self.preLoginData.nonce, self.preLoginData.pubkey, self.preLoginData.rsakv, self.pinCode, self.preLoginData['pcid']);
+        let options = {
+            method: 'POST',
+            url: self.loginUrl,
+            headers: headers,
+            body: encodeBody,
+            gzip: true
+        };
+        return new Promise((resolve, reject) => {
+            request(options, (error, response, body) => {
+                if (!error && response.statusCode == 200) {
+                    response.setEncoding('utf-8');
+                    resolve(response.body);
+                }else{
+                    reject('post请求失败',error)
+                }
+            })
+        })
+    }
+
+    // 获取最终重定向后的地址
+    getFinnalLoginUrl(responseBody) {
+        let reg = /location\.replace\((?:"|')(.*)(?:"|')\)/;
+        let loginUrl = reg.exec(responseBody)[1];
+        let parseLoginUrl = querystring.parse(loginUrl);
+        let ret = {
+            code:1,
+            res:loginUrl
+        }
+        switch(parseLoginUrl.retcode){
+            case '0':
+            break;
+            case '101':
+            ret = {
+                code:0,
+                res:"登录失败，登录名或密码错误"
+            }
+            break;
+            case '2070':
+            ret = {
+                code:0,
+                res:'登录失败，验证码错误'
+            }
+            break;
+            default:
+            ret = {
+                code:0,
+                res:'未知错误'
+            }
+            break;
+        }
+        return ret
+    }
+
+    // 获取cookie
+    getCookies(finnalLoginUrl) {
+        return new Promise((resolve, reject) => {
+            let j = request.jar();
+            request.get({url: finnalLoginUrl, jar: j}, function (error, reponse, body) {
+                let cookies = j.getCookieString(finnalLoginUrl);
+                if(!error){
+                    resolve(cookies)
+                }else{
+                    reject(error)
+                }
+            })
+        })
     }
 }

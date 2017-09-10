@@ -34,7 +34,7 @@ let mainConfig = {
   },
   output: {
     filename: '[name].js',
-    libraryTarget: 'commonjs2',
+    libraryTarget: 'umd',
     path: path.join(__dirname, '../dist/electron')
   },
   plugins: [
