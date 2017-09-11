@@ -35,7 +35,7 @@ function createWindow () {
           type: 'separator',
         },
         {
-          label: 'QBox',
+          label: 'WeiBox',
           accelerator: 'CmdOrCtrl+O',
           click: () => {
             app.emit('activate');

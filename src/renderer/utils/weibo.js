@@ -28,30 +28,30 @@ export default class Weibo{
         if(self.userName){
             // 格式化预登陆地址+编码用户名
             self.encodePreLoginUrl()
-            try {
-                // 获取预登陆原始数据
-                self.getPreLoginData().then((preLoginInitData)=>{
-                    // 解析预登陆原始数据
-                    self.preLoginData = self.parsePreLoginData(preLoginInitData)
-                    // 是否需要验证码
-                    if(self.preLoginData['showpin'] == 1){
-                        console.log('need pin code')
-                        // self.getPinImg();
-                        // self.inputPinCode();
-                    }else{
-                        self.postData().then((responseBody)=>{
-                            let finnalRet = self.getFinnalLoginUrl(responseBody)
-                            self.getCookies(finnalRet.res).then(ret=>{
-                                store.setItem('weiboxCookies',ret)
-                            }).catch(ex=>{
-                                console.log(ex)
-                            })
-                        })
-                    }
-                })
-            } catch (error) {
-                console.log(error)
-            }
+            // try {
+            //     // 获取预登陆原始数据
+            //     self.getPreLoginData().then((preLoginInitData)=>{
+            //         // 解析预登陆原始数据
+            //         self.preLoginData = self.parsePreLoginData(preLoginInitData)
+            //         // 是否需要验证码
+            //         if(self.preLoginData['showpin'] == 1){
+            //             console.log('need pin code')
+            //             // self.getPinImg();
+            //             // self.inputPinCode();
+            //         }else{
+            //             self.postData().then((responseBody)=>{
+            //                 let finnalRet = self.getFinnalLoginUrl(responseBody)
+            //                 self.getCookies(finnalRet.res).then(ret=>{
+            //                     store.setItem('weiboxCookies',ret)
+            //                 }).catch(ex=>{
+            //                     console.log(ex)
+            //                 })
+            //             })
+            //         }
+            //     })
+            // } catch (error) {
+            //     console.log(error)
+            // }
         }
     }
 
