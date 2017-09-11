@@ -7,11 +7,16 @@ const store = localStorage
 export default class Weibo{
     constructor(userName='',userPwd=''){
         let self = this
+        self.init(userName,userPwd)
+    }
+
+    init(userName='',userPwd=''){
+        let self = this
         // 初始化一些登录信息
         // 用户名
-        self.userName = userName;
+        self.userName = userName || self.userName;
         // 密码
-        self.userPwd = userPwd;
+        self.userPwd = userPwd || self.userPwd;
         // 预登陆地址，不带base64编码后的用户名,用于获取登录信息
         self.preLoginUrl = "http://login.sina.com.cn/sso/prelogin.php?entry=weibo&checkpin=1&callback=sinaSSOController.preloginCallBack&rsakt=mod&client=ssologin.js(v1.4.18)";
         // 登录的网页地址
@@ -20,69 +25,89 @@ export default class Weibo{
         self.preLoginData = '';
         // 初始化验证码为空
         self.pinCode = null;
-
-        self.userName && self.userPwd && self.init()
-    }
-
-    init(){
-        let self = this
-        self.encodePreLoginUrl()
-        try {
-            // 获取预登陆原始数据
-            self.getPreLoginData().then((preLoginInitData)=>{
-                // 解析预登陆原始数据
-                self.preLoginData = self.parsePreLoginData(preLoginInitData)
-                // 是否需要验证码
-                if(self.preLoginData['showpin'] == 1){
-                    console.log('need pin code')
-                    // self.getPinImg();
-                    // self.inputPinCode();
-                }else{
-                    self.postData().then((responseBody)=>{
-                        let finnalRet = self.getFinnalLoginUrl(responseBody)
-                        self.getCookies(finnalRet.res).then(ret=>{
-                            store.setItem('weiboxCookies',ret)
-                        }).catch(ex=>{
-                            console.log(ex)
+        if(self.userName){
+            // 格式化预登陆地址+编码用户名
+            self.encodePreLoginUrl()
+            try {
+                // 获取预登陆原始数据
+                self.getPreLoginData().then((preLoginInitData)=>{
+                    // 解析预登陆原始数据
+                    self.preLoginData = self.parsePreLoginData(preLoginInitData)
+                    // 是否需要验证码
+                    if(self.preLoginData['showpin'] == 1){
+                        console.log('need pin code')
+                        // self.getPinImg();
+                        // self.inputPinCode();
+                    }else{
+                        self.postData().then((responseBody)=>{
+                            let finnalRet = self.getFinnalLoginUrl(responseBody)
+                            self.getCookies(finnalRet.res).then(ret=>{
+                                store.setItem('weiboxCookies',ret)
+                            }).catch(ex=>{
+                                console.log(ex)
+                            })
                         })
-                    })
-                }
-            })
-        } catch (error) {
-            console.log(error)
+                    }
+                })
+            } catch (error) {
+                console.log(error)
+            }
         }
     }
 
-    // preLoginUrl构造，加上base64编码的用户名
+
+    /**
+     * 构造预登录链接，加上base64编码的用户名
+     * 
+     * @memberof Weibo
+     */
     encodePreLoginUrl() {
         let self = this
         let encodeUserName = encodePostData.encryptUserName(self.userName);
         self.preLoginUrl = `${self.preLoginUrl}&su=${encodeUserName}`;
     }
 
-    // 获取预登录数据
+    /**
+     * 获取预登录数据
+     * 
+     * @return {Object} Promise 
+     * @memberof Weibo
+     */
     getPreLoginData() {    
+        let self = this
         return new Promise((resolve, reject) => {
-            request(this.preLoginUrl, function (error, response, body) {
+            request(self.preLoginUrl, function (error, response, body) {
                 if (!error && response.statusCode == 200) {
-                    resolve(response.body);
+                    resolve(response.body)
                 } else {
-                    reject('没有获取到预登录数据');
+                    reject('没有获取到预登录数据')
                 }
             });
         });
     }
-    // 解析获取到的预登录数据
+    /**
+     * 解析获取到的预登录数据
+     * 
+     * @param {String} data 
+     * @return {Object} json
+     * @memberof Weibo
+     */
     parsePreLoginData(data) {
-        let reg = /\((.*)\)/;
-        return JSON.parse(reg.exec(data)[1]);
+        let reg = /\((.*)\)/
+        return JSON.parse(reg.exec(data)[1])
     }
 
-    // 如果有验证码则要输入验证码
+    /**
+     * 获取验证码地址
+     * 
+     * @return {String} PinCode Image Url
+     * @memberof Weibo
+     */
     getPinImg() {
         // 构造验证码的url
-        let pinImgUrl = `http://login.sina.com.cn/cgi/pin.php?r=${Math.floor(Math.random() * 1e8)}&s=0&p=${this.preLoginData['pcid']}`;
-        request(pinImgUrl).pipe(fs.createWriteStream(__dirname + '/../pinCode.png'));
+        let pinImgUrl = `http://login.sina.com.cn/cgi/pin.php?r=${Math.floor(Math.random() * 1e8)}&s=0&p=${this.preLoginData['pcid']}`
+        //request(pinImgUrl).pipe(fs.createWriteStream(__dirname + '/../pinCode.png'));
+        return pinImgUrl
     }
 
     inputPinCode() {
@@ -99,7 +124,13 @@ export default class Weibo{
         // })
     }
 
-    // post数据到服务器
+    /**
+     * Post 数据到服务器
+     * 
+     * @param {String} pinCode 
+     * @return {Object} Promise
+     * @memberof Weibo
+     */
     postData(pinCode) {
         let self = this
         let headers = {
@@ -129,7 +160,13 @@ export default class Weibo{
         })
     }
 
-    // 获取最终重定向后的地址
+    /**
+     * 获取最终重定向后的地址
+     * 
+     * @param {String} responseBody 
+     * @return {Object} JSON
+     * @memberof Weibo
+     */
     getFinnalLoginUrl(responseBody) {
         let reg = /location\.replace\((?:"|')(.*)(?:"|')\)/;
         let loginUrl = reg.exec(responseBody)[1];
@@ -163,7 +200,13 @@ export default class Weibo{
         return ret
     }
 
-    // 获取cookie
+    /**
+     * 获取Cookie
+     * 
+     * @param {String} finnalLoginUrl 
+     * @return {Object} Promise 
+     * @memberof Weibo
+     */
     getCookies(finnalLoginUrl) {
         return new Promise((resolve, reject) => {
             let j = request.jar();
