@@ -1,9 +1,8 @@
 <template>
     <div class="home" v-loading="loading" :element-loading-text="loadingText" >
         <div class="drag-wrap">
-            单击或拖拽图片到此
+            点击或拖拽图片到此
         </div>
-        <input id="fileInput" type="file" class="uploadTrigger" style="display:none;" accept="image/jpeg, image/png,image/gif" multiple>
         <div class="content-wrap">
             <el-row :gutter="20" :type="'flex'" align="middle">
                 <el-col :span="16" style="text-align:center;">
@@ -18,14 +17,15 @@
                 </el-col>
             </el-row>
             <ul id="result">
-                <li v-for="image in uploadedImages">
-                    <div class="pic" :style="`background: url(${image.src}) center / cover no-repeat;`"></div>
+                <li v-for="(val,key) in uploadedImages" :key="key">
+                    <div class="pic" :style="`background: url(${val.src}) center / cover no-repeat;`"></div>
                     <div class="base64">
-                        <input readonly :value="image.src">
+                        <input readonly @focus="select" :value="val.src">
                     </div>
                 </li>
             </ul>
         </div>
+        <input id="fileInput" type="file" class="uploadTrigger" style="display:none;" accept="image/jpeg, image/png,image/gif" multiple>
         <el-dialog :close-on-click-modal="false" title="请先登录微博" :visible.sync="loginDialogVisible">
             <el-form :model="weibo">
                 <el-form-item>
@@ -61,7 +61,7 @@ export default{
             loginDialogVisible:false,
             https:false,
             pinCodeLink:'',
-            imageFiles:[],
+            fileLength:0,
             uploadedImages:[],
             storageData:[],
             http_pre:'http://ww',
@@ -128,12 +128,16 @@ export default{
         // })
     },
     methods:{
+        select(event){
+            event.target.select()
+        },
         login(){
             let self = this
             self.loginDialogVisible = true
         },
         loginSubmit(){
             let self = this
+            self.loadingText = '拼命登录中...'
             self.loading = true
             let weibo = Object.keys(self.weiboObj).length == 0 ? new Weibo(self.weibo.userName,self.weibo.userPwd) : self.weiboObj
             if(self.weibo.pinCode){
@@ -184,27 +188,22 @@ export default{
         },
         putFiles(files){
             let self = this
-            self.imageFiles = []
+            let cookie = localStorage.weiboxCookies || ''
+            if(!cookie){
+                self.login()
+                return
+            }
+            self.fileLength = 0
             for (let i = 0 ,len = files.length; i < len; i++) {
                 let file = files[i]
                 if (/image\/\w+/.test(file.type) && file != 'undefined') {
-                    self.imageFiles.push(file)
+                    ++self.fileLength
+                    self.loadingText = '拼命上传中...'
+                    self.loading = true
                     self.imageUpload(file)
                 }
-                // const fileReader = new FileReader()
-                // fileReader.readAsDataURL(file)
-                // fileReader.addEventListener('load', (e) => {
-                //     let createLI = document.createElement('li')
-                //     createLI.innerHTML =  `
-                //             <div class="pic" style="background: url(${window.URL.createObjectURL(file)}) center / cover no-repeat;"></div>
-                //             <div class="base64">
-                //                 <textarea name="" id="">${e.target.result}</textarea>
-                //             </div>
-                //     `
-                //     document.querySelector('#result').appendChild(createLI)
-                // })
             }
-            if(self.imageFiles.length < 1){
+            if(self.fileLength < 1 && files.length){
                 self.$message({
                     message: '很抱歉，不支持非图片的文件格式',
                     type: 'warning'
@@ -213,11 +212,6 @@ export default{
         },
         imageUpload(file){
             let self = this
-            let cookie = localStorage.weiboxCookies || ''
-            if(!cookie){
-                self.login()
-                return
-            }
             let reader = new FileReader()
             reader.readAsDataURL(file)
             reader.onloadend = (evt)=>{
@@ -237,7 +231,6 @@ export default{
                     }
                 }
                 Server(config).then(ret=>{
-                    //console.log(ret)
                     try{
                         let splitIndex,rs,pid,params
                         splitIndex = ret.indexOf('{"')
@@ -253,8 +246,18 @@ export default{
                             src:imageUrl,
                             params:params
                         })
+                        if(--self.fileLength == 0){
+                            self.loading = false
+                            self.$notify({
+                                title: '温馨提醒',
+                                message: '上传成功~',
+                                type: 'success'   
+                            })
+                        }
                     }catch(ex){
+                        console.log(ret)
                         console.log(ex)
+                        self.login()
                     }
                 })
             }
@@ -348,6 +351,7 @@ export default{
 
 .home{
     height:100%;
+    font-size:0;
 }
 
 .drag-wrap {
@@ -359,6 +363,9 @@ export default{
     align-items: center;
     border-right: 1px dashed #ccc;
     font-size:1.2rem;
+    position: fixed;
+    top:0;
+    left:0;
 }
 .drag-wrap.on {
     border-color: #f66;
@@ -366,6 +373,7 @@ export default{
 .content-wrap{
     overflow: hidden;
     padding:1rem;
+    width:85rem;
     .cursor{
         cursor:pointer;
         font-size:1.4rem;
