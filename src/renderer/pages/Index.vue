@@ -374,7 +374,7 @@ export default{
 .content-wrap{
     overflow: hidden;
     padding:1rem;
-    width:85rem;
+    margin-left:15rem;
     .cursor{
         cursor:pointer;
         font-size:1.4rem;
