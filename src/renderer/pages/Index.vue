@@ -212,6 +212,7 @@ export default{
         },
         imageUpload(file){
             let self = this
+            let cookie = localStorage.weiboxCookies || ''
             let reader = new FileReader()
             reader.readAsDataURL(file)
             reader.onloadend = (evt)=>{
