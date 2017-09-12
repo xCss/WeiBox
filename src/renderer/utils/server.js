@@ -2,8 +2,7 @@ import request from 'request'
 
 const server = (config) => {
     return new Promise((resolve,reject)=>{
-        config['gzip'] = true
-        request(config).then((err,res,body)=>{
+        request(config,(err,res,body)=>{
             if(!err && res.statusCode == 200){
                 res.setEncoding('utf-8')
                 resolve(body)
@@ -13,7 +12,4 @@ const server = (config) => {
         })
     })
 }
-
-module.exports = {
-    server
-}
+export default server

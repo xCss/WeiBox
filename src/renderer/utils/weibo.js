@@ -25,34 +25,32 @@ export default class Weibo{
         self.preLoginData = '';
         // 初始化验证码为空
         self.pinCode = null;
-        if(self.userName){
-            // 格式化预登陆地址+编码用户名
-            self.encodePreLoginUrl()
-            // try {
-            //     // 获取预登陆原始数据
-            //     self.getPreLoginData().then((preLoginInitData)=>{
-            //         // 解析预登陆原始数据
-            //         self.preLoginData = self.parsePreLoginData(preLoginInitData)
-            //         // 是否需要验证码
-            //         if(self.preLoginData['showpin'] == 1){
-            //             console.log('need pin code')
-            //             // self.getPinImg();
-            //             // self.inputPinCode();
-            //         }else{
-            //             self.postData().then((responseBody)=>{
-            //                 let finnalRet = self.getFinnalLoginUrl(responseBody)
-            //                 self.getCookies(finnalRet.res).then(ret=>{
-            //                     store.setItem('weiboxCookies',ret)
-            //                 }).catch(ex=>{
-            //                     console.log(ex)
-            //                 })
-            //             })
-            //         }
-            //     })
-            // } catch (error) {
-            //     console.log(error)
-            // }
-        }
+        // 格式化预登陆地址+编码用户名
+        self.userName && self.encodePreLoginUrl()
+        // try {
+        //     // 获取预登陆原始数据
+        //     self.getPreLoginData().then((preLoginInitData)=>{
+        //         // 解析预登陆原始数据
+        //         self.preLoginData = self.parsePreLoginData(preLoginInitData)
+        //         // 是否需要验证码
+        //         if(self.preLoginData['showpin'] == 1){
+        //             console.log('need pin code')
+        //             // self.getPinImg();
+        //             // self.inputPinCode();
+        //         }else{
+        //             self.postData().then((responseBody)=>{
+        //                 let finnalRet = self.getFinnalLoginUrl(responseBody)
+        //                 self.getCookies(finnalRet.res).then(ret=>{
+        //                     store.setItem('weiboxCookies',ret)
+        //                 }).catch(ex=>{
+        //                     console.log(ex)
+        //                 })
+        //             })
+        //         }
+        //     })
+        // } catch (error) {
+        //     console.log(error)
+        // }
     }
 
 
@@ -139,8 +137,7 @@ export default class Weibo{
             'Content-Type':'application/x-www-form-urlencoded',
             'Connection': 'Keep-Alive'
         };
-        let encodeBody = encodePostData.encodePostData(self.userName, self.userPwd, self.preLoginData.servertime,
-            self.preLoginData.nonce, self.preLoginData.pubkey, self.preLoginData.rsakv, self.pinCode, self.preLoginData['pcid']);
+        let encodeBody = encodePostData.encodePostData(self.userName, self.userPwd, self.preLoginData.servertime, self.preLoginData.nonce, self.preLoginData.pubkey, self.preLoginData.rsakv, self.pinCode, self.preLoginData['pcid']);
         let options = {
             method: 'POST',
             url: self.loginUrl,

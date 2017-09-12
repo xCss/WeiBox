@@ -18,7 +18,9 @@
   padding: 0;
   font-family: "Exo 2", "Trebuchet MS","Helvetica","Arial",'PingFang SC','Hiragino Sans GB','STHeiti Light','Microsoft YaHei','SimHei','WenQuanYi Micro Hei',sans-serif ;
 }
-body{
+html,body,#app{
   color:#58666e;
+  height:100%;
+  font-size:62.5%;
 }
 </style>
