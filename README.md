@@ -18,7 +18,9 @@
 - [WeiboPicBed](https://github.com/suxiaogang/WeiboPicBed)
 
 ## 💰捐赠  
-<img width="150px" src="./static/assets/alipay.png">
-<img width="150px" src="./static/assets/wechat.png">
+| 支付宝 | 微信 | 
+| :------: | :------: | 
+| <img width="150px" src="./static/assets/alipay.png"> | <img width="150px" src="./static/assets/wechat.png"> | 
+
 
 
