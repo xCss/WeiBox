@@ -18,7 +18,7 @@
 - [WeiboPicBed](https://github.com/suxiaogang/WeiboPicBed)
 
 ## 💰捐赠  
-<img width="150px" src="http://ww1.sinaimg.cn/large/006qRazegy1fji201rguwj308m08mdib.jpg">
-<img width="150px" src="http://ww1.sinaimg.cn/large/006qRazegy1fji201qzfnj308m08m3zy.jpg">
+<img width="150px" src="./static/assets/alipay.png">
+<img width="150px" src="./static/assets/wechat.png">
 
 
