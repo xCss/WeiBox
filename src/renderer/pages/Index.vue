@@ -325,9 +325,6 @@ export default{
             let self = this
             self.changePicFormat()
 
-        },
-        uploadedImages(v){
-            console.log(JSON.stringify(v,'',4))
         }
     }
 }
