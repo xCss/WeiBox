@@ -1,7 +1,7 @@
 {
   "name": "weibox",
-  "version": "1.0.0",
-  "description": "weibo images  a weibo images client",
+  "version": "1.0.1",
+  "description": "a weibo picture bed",
   "license": "GPL-2.0",
   "main": "./dist/electron/main.js",
   "author": {
