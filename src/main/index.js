@@ -1,4 +1,4 @@
-import { app, ipcMain,BrowserWindow, Menu, Tray } from 'electron'
+import { app, ipcMain,BrowserWindow, Menu, Tray,dialog } from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -20,52 +20,57 @@ function createWindow () {
    */
   const template = [
     {
-      role: 'editMenu',
-    },
-    {
-      label: 'Window',
+      label: '窗口',
       submenu: [
         {
+          label:'最小化',
           role: 'minimize',
         },
         {
+          label:'退出(X)',
           role: 'close',
-        },
-        {
-          type: 'separator',
-        },
-        {
-          label: 'WeiBox',
-          accelerator: 'CmdOrCtrl+O',
-          click: () => {
-            app.emit('activate');
-          },
-        },
+        }
       ],
     },
     {
+      label:'查看',
+      submenu:[
+        {
+          label:'首页',
+          click(){
+            mainWindow.loadURL(winURL)
+          }
+        },{
+          label:'历史记录',
+          accelerator:'CmdOrCtrl+H',
+          click(){
+            mainWindow.loadURL(winURL + '#/history')
+          }
+        },{
+          label:'刷新页面',
+          role: 'reload',
+        },{
+          type: 'separator',
+        },{
+          label:'开发者工具',
+          role:'toggledevtools'
+        }
+      ]
+    },
+    {
+      label:'帮助',
       role: 'help',
       submenu: [
         {
-          label: 'Document',
-          click() { require('electron').shell.openExternal('https://github.com/xCss/WeiBox/blob/master/README.md'); },
-        },
-        {
-          type: 'separator',
-        },
-        {
-          label: 'Open Source',
+          label: 'Github',
           click() { require('electron').shell.openExternal('https://github.com/xCss/WeiBox'); },
-        },
-        {
+        },{
           label: 'License',
           click() { require('electron').shell.openExternal('https://github.com/xCss/WeiBox/blob/master/LICENSE'); },
-        },
-        {
+        },{
           type: 'separator',
-        },
-        {
-          label: 'About',
+        },{
+          label: '关于',
           click() { require('electron').shell.openExternal('https://github.com/xCss'); },
         },
       ],

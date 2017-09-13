@@ -1,22 +1,24 @@
-# WeiBox
+# WeiBox -- 微博图床客户端
 
-> 微博图床客户端
+- [x] 支持点选/拖拽方式上传图片至新浪微博
+- [x] 支持批量上传
+- [x] 可选择返回的图片尺寸
+- [x] 可生成`图片链接`、`HTML`、`UBB`和`MarkDown`四种格式
+- [x] 支持返回`https`安全协议的图片地址
 
->  
+## 🚀 Features
+- [ ] 历史记录同步
+- [ ] 浏览和删除历史记录
 
-#### Build Setup
+## 🔗 参考  
+- [Drag and drop](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_and_drop)  
+- [DataTransfer](https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer)  
+- [FileReader](https://developer.mozilla.org/en/docs/Web/API/FileReader)  
+- [localStorage](https://developer.mozilla.org/en/docs/Web/API/Window/localStorage)  
+- [WeiboPicBed](https://github.com/suxiaogang/WeiboPicBed)
 
-``` bash
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:9080
-npm run dev
-
-# build electron application for production
-npm run build
+## 💰捐赠  
+<img width="150px" src="http://ww1.sinaimg.cn/large/006qRazegy1fji201rguwj308m08mdib.jpg">
+<img width="150px" src="http://ww1.sinaimg.cn/large/006qRazegy1fji201qzfnj308m08m3zy.jpg">
 
 
-```
-
----

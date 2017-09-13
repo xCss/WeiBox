@@ -5,14 +5,22 @@
         </div>
         <div class="content-wrap">
             <el-row :gutter="20" :type="'flex'" align="middle">
-                <el-col :span="16" style="text-align:center;">
+                <el-col :span="8" style="text-align:center;">
                     <el-button-group>
                         <el-button :type="size === 'thumbnail' ? 'primary':''" @click.stop="size='thumbnail'">缩略图</el-button>
                         <el-button :type="size === 'mw690' ? 'primary':''" @click.stop="size='mw690'">中等尺寸</el-button>
                         <el-button :type="size === 'large' ? 'primary':''" @click.stop="size='large'">原图</el-button>
                     </el-button-group>
                 </el-col>
-                <el-col :span="8">
+                <el-col :span="11" style="text-align:center;">
+                    <el-button-group>
+                        <el-button :type="clazz === 'link' ? 'primary':''" @click.stop="clazz='link'">图片链接</el-button>
+                        <el-button :type="clazz === 'html' ? 'primary':''" @click.stop="clazz='html'">HTML标签</el-button>
+                        <el-button :type="clazz === 'ubb' ? 'primary':''" @click.stop="clazz='ubb'">UBB</el-button>
+                        <el-button :type="clazz === 'markdown' ? 'primary':''" @click.stop="clazz='markdown'">MarkDown</el-button>
+                    </el-button-group> 
+                </el-col>
+                <el-col :span="5" style="text-align:center;">
                     <el-switch v-model="https" on-text="ON" off-text="OFF"></el-switch> <span class="cursor" @click="https=!https"> HTTPS</span>
                 </el-col>
             </el-row>
@@ -20,7 +28,7 @@
                 <li v-for="(val,key) in uploadedImages" :key="key">
                     <div class="pic" :style="`background: url(${val.src}) center / cover no-repeat;`"></div>
                     <div class="base64">
-                        <input readonly @focus="select" :value="val.src">
+                        <input readonly @focus="select" :value="val.link">
                     </div>
                 </li>
             </ul>
@@ -36,7 +44,7 @@
                 </el-form-item>
                 <el-form-item v-if="pinCodeLink.length">
                     <el-input placeholder="请输入验证码" v-model="weibo.pinCode">
-                        <template slot="append"><img width="75" src="http://login.sina.com.cn/cgi/pin.php?r=63185872&s=0&p=12312312"></template>
+                        <template slot="append"><img @click="rePinCode" width="75" src="http://login.sina.com.cn/cgi/pin.php?r=63185872&s=0&p=12312312"></template>
                     </el-input>
                 </el-form-item>
                 <el-form-item class="quote"><i class="el-icon-information"></i> 账户信息不会上传，请放心登录</el-form-item>
@@ -56,6 +64,7 @@ export default{
     data(){
         return {
             size:'large',
+            clazz:'link',
             loading:false,
             loadingText:'拼命登录中...',
             loginDialogVisible:false,
@@ -110,7 +119,6 @@ export default{
         }
         // 获取历史
         self.storageData = localStorage.weiboxData ? JSON.parse(localStorage.weiboxData) : []
-
         //HTML5 paste http://www.zhihu.com/question/20893119
         // document.body.addEventListener('paste',(e)=>{
         //     e = e.originalEvent
@@ -159,6 +167,10 @@ export default{
                 })
             }
         },
+        rePinCode(){
+            let self = this
+            self.pinCodeLink = self.weiboObj.getPinImg()
+        },
         weiboPostData(weibo){
             let self = this
             weibo.postData().then(body=>{
@@ -168,8 +180,7 @@ export default{
                     localStorage.weiboxCookies = ret
                     self.loading = false
                     self.loginDialogVisible = false
-                    self.$notify({
-                        title: '温馨提醒',
+                    self.$message({
                         message: '微博登录成功~',
                         type: 'success'   
                     })
@@ -241,24 +252,30 @@ export default{
                             pid: pid,
                             ext: acceptType == 'data:image/gif' ? '.gif' : '.jpg'
                         }
-                        let imageUrl = self.pid2url(params)
-                        self.save2Local(params,imageUrl)
-                        self.uploadedImages.push({
-                            src:imageUrl,
+                        let src = self.pid2url(params)
+                        let link = self.changeLink(src)
+                        self.save2Local(params,src)
+                        self.uploadedImages.unshift({
+                            src:src,
+                            link:link,
                             params:params
                         })
                         if(--self.fileLength == 0){
                             self.loading = false
-                            self.$notify({
-                                title: '温馨提醒',
+                            self.$message({
                                 message: '上传成功~',
                                 type: 'success'   
                             })
                         }
                     }catch(ex){
                         console.log(ret)
-                        console.log(ex)
-                        self.login()
+                        console.error(ex)
+                        self.loading = false
+                        self.$message({
+                            message: '很抱歉，上传失败咯。请查看控制台信息',
+                            type: 'warning'
+                        })
+                        //self.login()
                     }
                 })
             }
@@ -296,19 +313,38 @@ export default{
         },
         save2Local(params,src){
             let self = this
-            self.storageData.push({
+            self.storageData.unshift({
                 date:Date.now(),
                 src:src,
                 params:params
             })
             localStorage.weiboxData = JSON.stringify(self.storageData)
         },
+        changeLink(src){
+            let self = this
+            let link = src
+            switch(self.clazz){
+                case 'html':
+                link = `<img src='${src}' />`
+                break;
+                case 'ubb':
+                link = `[IMG]${src}[/IMG]`
+                break;
+                case 'markdown':
+                link = `![](${src})`
+                break;
+            }
+            return link
+        },
         changePicFormat(){
             let self = this
             let temp = []
             self.uploadedImages.forEach(item=>{
+                let src = self.pid2url(item.params)
+                let link = self.changeLink(src)
                 temp.push({
-                    src:self.pid2url(item.params),
+                    src:src,
+                    link:link,
                     params:item.params
                 })
             })
@@ -325,6 +361,10 @@ export default{
             let self = this
             self.changePicFormat()
 
+        },
+        clazz(c){
+            let self = this
+            self.changePicFormat()
         }
     }
 }
@@ -364,6 +404,7 @@ export default{
     position: fixed;
     top:0;
     left:0;
+    cursor:pointer;
 }
 .drag-wrap.on {
     border-color: #f66;
