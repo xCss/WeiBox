@@ -8,7 +8,7 @@
 
 ## 🚀 Features
 - [ ] 历史记录同步
-- [ ] 浏览和删除历史记录
+- [ ] 历史记录的浏览和删除
 
 ## 🔗 参考  
 - [Drag and drop](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_and_drop)  
@@ -20,7 +20,7 @@
 ## 💰捐赠  
 | 支付宝 | 微信 | 
 | :------: | :------: | 
-| <img width="150px" src="./static/assets/alipay.png"> | <img width="150px" src="./static/assets/wechat.png"> | 
+| <img width="150" src="./static/assets/alipay.png"> | <img width="135" src="./static/assets/wechat.png"> | 
 
 
 
