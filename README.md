@@ -17,10 +17,13 @@
 - [localStorage](https://developer.mozilla.org/en/docs/Web/API/Window/localStorage)  
 - [WeiboPicBed](https://github.com/suxiaogang/WeiboPicBed)
 
-## 💰捐赠  
+## 💰 捐赠  
 | 支付宝 | 微信 | 
 | :------: | :------: | 
 | <img width="150" src="./static/assets/alipay.png"> | <img width="135" src="./static/assets/wechat.png"> | 
+
+## 👇 下载  
+https://github.com/xCss/WeiBox/releases
 
 
 
