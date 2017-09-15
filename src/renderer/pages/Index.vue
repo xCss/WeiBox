@@ -4,7 +4,7 @@
             点击或拖拽图片到此
         </div>
         <div class="content-wrap">
-            <el-row :gutter="20" :type="'flex'" align="middle">
+            <el-row class="options" :gutter="20" :type="'flex'" align="middle">
                 <el-col :span="8" style="text-align:center;">
                     <el-button-group>
                         <el-button :type="size === 'thumbnail' ? 'primary':''" @click.stop="size='thumbnail'">缩略图</el-button>
@@ -54,6 +54,15 @@
                 <el-button type="primary" @click="loginSubmit">登 录</el-button>
             </div>
         </el-dialog>
+
+    <el-dropdown class="menu">
+      <i class="el-icon-menu"></i>
+      <el-dropdown-menu class="menu-slide" slot="dropdown">
+        <el-dropdown-item>切换登录账号</el-dropdown-item>
+        <el-dropdown-item>清除历史记录</el-dropdown-item>
+        <el-dropdown-item divided>关于</el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
     </div>
 </template>
 <script>
@@ -87,6 +96,10 @@ export default{
         let self = this
         let getZONE = document.querySelectorAll('.drag-wrap')[0]
         let fileInput = document.querySelector('#fileInput')
+        let ipc = self.$electron.ipcRenderer
+        ipc.on('changeLogin',()=>{
+            console.log('changeLogin')
+        })
         self.https = localStorage.is_https ?  JSON.parse(localStorage.is_https) : self.https;
         getZONE.addEventListener('dragover', (e) => {
             e.preventDefault()
@@ -119,6 +132,13 @@ export default{
         }
         // 获取历史
         self.storageData = localStorage.weiboxData ? JSON.parse(localStorage.weiboxData) : []
+        self.storageData.forEach(item=>{
+            self.uploadedImages.push({
+                src:item.src,
+                link:self.changeLink(item.src),
+                params:item.params
+            })
+        })
         //HTML5 paste http://www.zhihu.com/question/20893119
         // document.body.addEventListener('paste',(e)=>{
         //     e = e.originalEvent
@@ -271,10 +291,19 @@ export default{
                         console.log(ret)
                         console.error(ex)
                         self.loading = false
-                        self.$message({
-                            message: '很抱歉，上传失败咯。请查看控制台信息',
+                        self.$confirm('很抱歉，上传图片失败<br>目测是登录信息失效','提示',{
+                            confirmButtonText: '重新登录',
+                            cancelButtonText: '关闭',
                             type: 'warning'
+                        }).then(()=>{
+                            self.login()
+                        }).catch(ex=>{
+
                         })
+                        // self.$message({
+                        //     message: '很抱歉，上传失败咯。请查看控制台信息',
+                        //     type: 'warning'
+                        // })
                         //self.login()
                     }
                 })
@@ -413,6 +442,23 @@ export default{
     overflow: hidden;
     padding:1rem;
     margin-left:15rem;
+    position:relative;
+    height:100%;
+    .options{
+        width:100%;
+        position:absolute;
+        top:0;
+        left:0;
+        height:5.6rem;
+        margin:0 !important;
+        box-shadow: 0 1px 15px #dedede;
+        background:#fff;
+    }
+    #result{
+        height:100%;
+        padding-top:5.6rem;
+        overflow:auto;
+    }
     .cursor{
         cursor:pointer;
         font-size:1.4rem;

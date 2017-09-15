@@ -1,16 +1,18 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <index></index>
   </div>
 </template>
 
 <script>
-  export default {
-    name: 'weibox'
-  }
+import Index from './pages/Index'
+export default {
+  components:{Index},
+  name: 'weibox'
+}
 </script>
 
-<style>
+<style lang="scss">
 /* CSS */
 * {
   box-sizing: border-box;
@@ -22,5 +24,21 @@ html,body,#app{
   color:#58666e;
   height:100%;
   font-size:62.5%;
+  position:relative;
+}
+.menu{
+  position:absolute;
+  right:1.5rem;
+  bottom:1.5rem;
+  font-size:1.2rem;
+  i{
+    font-size:2.2rem;
+    &:hover{
+      color:#20a0ff;
+    }
+  }
+}
+.menu-slide{
+  font-size:1.4rem;
 }
 </style>

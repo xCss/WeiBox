@@ -1,18 +1,18 @@
-import { app, ipcMain,BrowserWindow, Menu, Tray,dialog } from 'electron'
-
+import { app,ipc, ipcMain,BrowserWindow, Menu, Tray } from 'electron'
+const path = require('path')
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+  global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
 let mainWindow,mainMenu,appIcon
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
-
+const iconPath = `${__static}/assets/icon.png`
 function createWindow () {
 
   /**
@@ -33,22 +33,23 @@ function createWindow () {
       ],
     },
     {
-      label:'查看',
+      label:'设置',
       submenu:[
         {
-          label:'首页',
+          label:'切换微博账号',
+          accelerator:'CmdOrCtrl+ALT+C',
           click(){
-            mainWindow.loadURL(winURL)
+            //mainWindow.loadURL(winURL)
+            //ipc.send('changeLogin')
+            console.log(ipcMain)
           }
         },{
-          label:'历史记录',
-          accelerator:'CmdOrCtrl+H',
+          label:'清空历史记录',
+          accelerator:'CmdOrCtrl+ALT+H',
           click(){
-            mainWindow.loadURL(winURL + '#/history')
+            ipc.send('clearHistory')
+            //mainWindow.loadURL(winURL + '#/history')
           }
-        },{
-          label:'刷新页面',
-          role: 'reload',
         },{
           type: 'separator',
         },{
@@ -58,22 +59,9 @@ function createWindow () {
       ]
     },
     {
-      label:'帮助',
-      role: 'help',
-      submenu: [
-        {
-          label: 'Github',
-          click() { require('electron').shell.openExternal('https://github.com/xCss/WeiBox'); },
-        },{
-          label: 'License',
-          click() { require('electron').shell.openExternal('https://github.com/xCss/WeiBox/blob/master/LICENSE'); },
-        },{
-          type: 'separator',
-        },{
-          label: '关于',
-          click() { require('electron').shell.openExternal('https://github.com/xCss'); },
-        },
-      ],
+      label:'关于',
+      role: 'about',
+      click(){require('electron').shell.openExternal('https://github.com/xCss/WeiBox')}
     },
   ];
 
@@ -107,7 +95,8 @@ function createWindow () {
     width: 1000,
     titleBarStyle: 'hidden-inset',
     resizable: false,
-    show: false
+    show: false,
+    icon:iconPath
   })
 
   mainWindow.loadURL(winURL)
@@ -147,10 +136,6 @@ app.on('activate', () => {
   }
 })
 
-ipcMain.on('asynchronous-message',(event,args)=>{
-  console.log(args);
-  event.sender.send('asynchronous-reply', 'pong')
-})
 
 /**
  * Auto Updater
