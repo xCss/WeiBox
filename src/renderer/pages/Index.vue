@@ -33,7 +33,7 @@
                 </li>
             </ul>
         </div>
-        <input id="fileInput" type="file" class="uploadTrigger" style="display:none;" accept="image/jpeg, image/png,image/gif" multiple>
+        <input id="fileInput" type="file" class="uploadTrigger" style="display:none;" accept="image/*" multiple>
         <el-dialog :close-on-click-modal="false" title="请先登录微博" :visible.sync="loginDialogVisible">
             <el-form :model="weibo">
                 <el-form-item>
@@ -293,7 +293,7 @@ export default{
                         self.loading = false
                         self.$confirm('很抱歉，上传图片失败<br>目测是登录信息失效','提示',{
                             confirmButtonText: '重新登录',
-                            cancelButtonText: '关闭',
+                            cancelButtonText: '取消',
                             type: 'warning'
                         }).then(()=>{
                             self.login()
