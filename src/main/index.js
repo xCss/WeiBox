@@ -16,77 +16,6 @@ const iconPath = `${__static}/assets/icon.png`
 function createWindow () {
 
   /**
-   * Initial menu options
-   */
-  const template = [
-    {
-      label: '窗口',
-      submenu: [
-        {
-          label:'最小化',
-          role: 'minimize',
-        },
-        {
-          label:'退出(X)',
-          role: 'close',
-        }
-      ],
-    },
-    {
-      label:'设置',
-      submenu:[
-        {
-          label:'切换微博账号',
-          accelerator:'CmdOrCtrl+ALT+C',
-          click(){
-            //mainWindow.loadURL(winURL)
-            //ipc.send('changeLogin')
-            console.log(ipcMain)
-          }
-        },{
-          label:'清空历史记录',
-          accelerator:'CmdOrCtrl+ALT+H',
-          click(){
-            ipc.send('clearHistory')
-            //mainWindow.loadURL(winURL + '#/history')
-          }
-        },{
-          type: 'separator',
-        },{
-          label:'开发者工具',
-          role:'toggledevtools'
-        }
-      ]
-    },
-    {
-      label:'关于',
-      role: 'about',
-      click(){require('electron').shell.openExternal('https://github.com/xCss/WeiBox')}
-    },
-  ];
-
-  if (process.platform === 'darwin') {
-    template.unshift({
-      label: app.getName(),
-      submenu: [
-        { role: 'about' },
-        { type: 'separator' },
-        { role: 'services', submenu: [] },
-        { type: 'separator' },
-        { role: 'hide' },
-        { role: 'hideothers' },
-        { role: 'unhide' },
-        { type: 'separator' },
-        { role: 'quit' },
-      ],
-    });
-  }
-
-  mainMenu = Menu.buildFromTemplate(template);
-  Menu.setApplicationMenu(mainMenu);
-
-
-  /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
@@ -120,6 +49,15 @@ function createWindow () {
       }
     });
   }
+
+  // 清空历史记录
+  ipcMain.on('clearHistory',function(evt,args){
+    evt.sender.send('clearHistory',true)
+  })
+  // 切换登录账号
+  ipcMain.on('changeLogin',function(evt,args){
+    evt.sender.send('changeLogin',true)
+  })
 }
 
 app.on('ready', createWindow)

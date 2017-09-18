@@ -34,7 +34,7 @@
             </ul>
         </div>
         <input id="fileInput" type="file" class="uploadTrigger" style="display:none;" accept="image/*" multiple>
-        <el-dialog :close-on-click-modal="false" title="请先登录微博" :visible.sync="loginDialogVisible">
+        <el-dialog :close-on-click-modal="false" title="请登录微博" :visible.sync="loginDialogVisible">
             <el-form :model="weibo">
                 <el-form-item>
                     <el-input placeholder="邮箱/会员账号/手机号" v-model="weibo.userName" auto-complete="off"></el-input>
@@ -54,15 +54,6 @@
                 <el-button type="primary" @click="loginSubmit">登 录</el-button>
             </div>
         </el-dialog>
-
-    <el-dropdown class="menu">
-      <i class="el-icon-menu"></i>
-      <el-dropdown-menu class="menu-slide" slot="dropdown">
-        <el-dropdown-item>切换登录账号</el-dropdown-item>
-        <el-dropdown-item>清除历史记录</el-dropdown-item>
-        <el-dropdown-item divided>关于</el-dropdown-item>
-      </el-dropdown-menu>
-    </el-dropdown>
     </div>
 </template>
 <script>
@@ -98,7 +89,28 @@ export default{
         let fileInput = document.querySelector('#fileInput')
         let ipc = self.$electron.ipcRenderer
         ipc.on('changeLogin',()=>{
-            console.log('changeLogin')
+            self.weibo = {
+                userName:'',
+                userPwd:'',
+                pinCode:''
+            }
+            self.weiboObj = {}
+            self.login()
+        })
+        ipc.on('clearHistory',()=>{
+            self.$confirm('确认清除历史记录?','温馨提醒',{
+                confirmButtonText:'确认清除',
+                cancelButtonText:'取消',
+                type: 'warning'
+            }).then(()=>{
+                localStorage.removeItem('weiboxData')
+                self.storageData = []
+                self.uploadedImages = []
+                self.$message({
+                    type: 'success',
+                    message: '历史记录清除成功!'
+                })
+            }).catch(()=>{})
         })
         self.https = localStorage.is_https ?  JSON.parse(localStorage.is_https) : self.https;
         getZONE.addEventListener('dragover', (e) => {
