@@ -303,7 +303,14 @@ export default{
                         console.log(ret)
                         console.error(ex)
                         self.loading = false
-                        self.$confirm('很抱歉，上传图片失败<br>目测是登录信息失效','提示',{
+                        let h = self.$createElement
+                        self.$msgbox({
+                            title:'温馨提醒',
+                            message:h('div',null,[
+                                h('p',null,'很抱歉，上传图片失败'),
+                                h('p',null,'目测是登录信息失效')
+                            ]),
+                            showCancelButton: true,
                             confirmButtonText: '重新登录',
                             cancelButtonText: '取消',
                             type: 'warning'
