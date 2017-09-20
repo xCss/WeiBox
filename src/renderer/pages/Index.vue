@@ -376,7 +376,7 @@ export default{
                 link = `<img src='${src}' />`
                 break;
                 case 'ubb':
-                link = `[IMG]${src}[/IMG]`
+                link = `[img]${src}[/img]`
                 break;
                 case 'markdown':
                 link = `![](${src})`
